@@ -37,7 +37,7 @@ struct Depth{
 };
 class ExchangeFac {
 public:
-    virtual void get_market_list()=0;                                           //获取交易所支持的交易对
+
     virtual std::shared_ptr<std::vector<std::string>> print_market_list()=0;    //输出交易对列表
 
     virtual double print_pair_rate(const std::string pair_str)=0;               //输出某个交易对的最新成交价(示例: BTC_ETH)

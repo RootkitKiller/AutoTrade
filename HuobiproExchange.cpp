@@ -6,7 +6,8 @@
 #include "hmac-sha256.h"
 #include "base64.h"
 
-void HuobiproExchange::get_market_list() {
+
+std::shared_ptr<std::vector<std::string>> HuobiproExchange::print_market_list() {
     //1 加密请求的参数，参数如下：
     // GET\n
     // api.huobi.pro\n
@@ -47,17 +48,15 @@ void HuobiproExchange::get_market_list() {
             std::cout<<json_result<<std::endl;
             //auto json_array=json_result.as_array();
             //for(auto value:json_array) {
-                //std::cout<<value.as_string()<<std::endl;
-                //p_pair_list->push_back(value.as_string());
+            //std::cout<<value.as_string()<<std::endl;
+            //p_pair_list->push_back(value.as_string());
             //}
         }
         catch (http_exception const & e){
             std::cout << e.what() << std::endl;
         }
     }).wait();
-}
 
-std::shared_ptr<std::vector<std::string>> HuobiproExchange::print_market_list() {
     return std::shared_ptr<std::vector<std::string>>();
 }
 

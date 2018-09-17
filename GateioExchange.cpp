@@ -38,7 +38,8 @@ std::pair<std::shared_ptr<std::vector<Depth>>,std::shared_ptr<std::vector<Depth>
 }
 
 
-void GateioExchange::get_market_list() {
+std::shared_ptr<std::vector<std::string>> GateioExchange::print_market_list() {
+
     p_client->request(methods::GET,"/api2/1/pairs").then([&](http_response response)-> pplx::task<json::value>{
         if(response.status_code() == status_codes::OK){
             return response.extract_json();
@@ -57,11 +58,6 @@ void GateioExchange::get_market_list() {
             std::cout << e.what() << std::endl;
         }
     }).wait();
-
-}
-
-
-std::shared_ptr<std::vector<std::string>> GateioExchange::print_market_list() {
     return p_pair_list;
 }
 

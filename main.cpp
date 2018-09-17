@@ -1,15 +1,15 @@
 #include <iostream>
 #include "ExchangeFac.h"
 #include "GateioExchange.h"
+#include "BiboxExchange.h"
 #include "HuobiproExchange.h"
 
 int main() {
 
     std::shared_ptr<ExchangeFac> exchange_A=std::make_shared<GateioExchange>\
             ("Your ApiKey","Your SecrectKey");
-    exchange_A->get_market_list();
-
     auto p_pair_list=exchange_A->print_market_list();
+
     auto pair_rate=exchange_A->print_pair_rate((*p_pair_list)[0]);
     std::cout<<"btc/usdt行情  "<<(*p_pair_list)[0]<<"  "<<pair_rate<<std::endl;
 
@@ -29,8 +29,9 @@ int main() {
     }
 
 
-    //std::shared_ptr<ExchangeFac> exchange_B=std::make_shared<HuobiproExchange>\
-    //    ("Your ApiKey ","Your SecrectKey");
-    //exchange_B->get_market_list();
+    std::shared_ptr<ExchangeFac> exchange_B=std::make_shared<BiboxExchange>\
+            ("Your ApiKey","Your SecrectKey");
+    auto p_pair_list_b=exchange_B->print_market_list();
+
     return 0;
 }
