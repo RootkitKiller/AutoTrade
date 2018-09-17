@@ -13,7 +13,12 @@ std::shared_ptr<std::vector<std::string>> BiboxExchange::print_market_list() {
     }).then([&](pplx::task<json::value> previousTask){
         try{
             auto json_result=previousTask.get();
-            std::cout<<json_result<<std::endl;
+            auto list_array=json_result["result"].as_array();
+            for(auto pair:list_array){
+                std::cout<<pair["id"]<<std::endl;
+                std::cout<<pair["pair"]<<std::endl;
+            }
+            //std::cout<<json_result<<std::endl;
             //auto json_array=json_result.as_array();
             //for(auto value:json_array) {
                 //std::cout<<value.as_string()<<std::endl;
