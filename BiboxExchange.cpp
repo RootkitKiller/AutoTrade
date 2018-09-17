@@ -15,15 +15,10 @@ std::shared_ptr<std::vector<std::string>> BiboxExchange::print_market_list() {
             auto json_result=previousTask.get();
             auto list_array=json_result["result"].as_array();
             for(auto pair:list_array){
-                std::cout<<pair["id"]<<std::endl;
-                std::cout<<pair["pair"]<<std::endl;
+                //std::cout<<pair["id"]<<std::endl;
+                //std::cout<<pair["pair"]<<std::endl;
+                p_pair_list->push_back(pair["pair"].as_string());
             }
-            //std::cout<<json_result<<std::endl;
-            //auto json_array=json_result.as_array();
-            //for(auto value:json_array) {
-                //std::cout<<value.as_string()<<std::endl;
-               // p_pair_list->push_back(value.as_string());
-            //}
         }
         catch (http_exception const & e){
             std::cout << e.what() << std::endl;
