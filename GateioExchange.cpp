@@ -15,6 +15,8 @@ std::pair<std::shared_ptr<std::vector<Depth>>,std::shared_ptr<std::vector<Depth>
     }).then([&](pplx::task<json::value> previousTask){
         try{
             auto json_result=previousTask.get();
+	    p_asks_depth.reset(new std::vector<Depth>);
+            p_bids_depth.reset(new std::vector<Depth>);
             if(json_result["asks"].is_array()== true &&
                     json_result["bids"].is_array()== true) {
                 auto asks_array = json_result["asks"].as_array();

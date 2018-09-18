@@ -65,6 +65,8 @@ BiboxExchange::print_pair_depth(const std::string pair_str) {
         try{
             auto json_ret=previousTask.get();
             auto json_result=json_ret["result"];
+	    p_asks_depth.reset(new std::vector<Depth>);
+            p_bids_depth.reset(new std::vector<Depth>);
             if(json_result["asks"].is_array()== true &&
                json_result["bids"].is_array()== true) {
                 auto asks_array = json_result["asks"].as_array();

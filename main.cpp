@@ -13,6 +13,8 @@ void compare_price(const Depth &asks_depth,const Depth &bids_depth){
         std::cout<<"买入交易所的卖一价: "<<asks_depth.rate<<std::endl;
         std::cout<<"卖出交易所的买一数: "<<bids_depth.number<<std::endl;
         std::cout<<"卖出交易所的买一价: "<<bids_depth.rate<<std::endl;
+	std::cout<<"毛利率: "<<earn_yield<<"%"<<std::endl;
+	std::cout<<std::endl;
     }
 }
 void find_pair(std::shared_ptr<ExchangeFac> exchange_A,std::shared_ptr<ExchangeFac> exchange_B){
@@ -21,11 +23,11 @@ void find_pair(std::shared_ptr<ExchangeFac> exchange_A,std::shared_ptr<ExchangeF
 
     std::sort(p_pair_list_A->begin(),p_pair_list_A->end());
     std::sort(p_pair_list_B->begin(),p_pair_list_B->end());
-    
-    std::vector<std::string> replace_pair_vec{"EOS_BTC","EOS_ETH","ETH_BTC","LTC_ETH","LTC_BTC"\
+    std::vector<std::string> replace_pair_vec;  
+//    std::vector<std::string> replace_pair_vec{"EOS_BTC","EOS_ETH","ETH_BTC","LTC_ETH","LTC_BTC"\
                 ,"ETC_ETH","ETC_BTC","BCH_ETH","BCH_ETC"};
-    //std::set_intersection(p_pair_list_A->begin(),p_pair_list_A->end(),\
-                //p_pair_list_B->begin(),p_pair_list_B->end(),std::back_inserter(replace_pair_vec));
+    std::set_intersection(p_pair_list_A->begin(),p_pair_list_A->end(),\
+                p_pair_list_B->begin(),p_pair_list_B->end(),std::back_inserter(replace_pair_vec));
     for(auto pair_str:replace_pair_vec){
 
         //获得两个平台的卖一价和买一价
@@ -39,7 +41,21 @@ void find_pair(std::shared_ptr<ExchangeFac> exchange_A,std::shared_ptr<ExchangeF
         auto bids_pair_B=depth_pair_B.second->front();  //买一价
         //交易所的卖一大于买一
         //如果A交易所的卖一价 小于 B交易所的买一价，则根据深度吃掉A交易所的卖一/吃掉自身余额（规避风险，吃单共分成10次），反之亦然
-        if(asks_pair_A.rate<bids_pair_B.rate){
+        std::cout<<"交易对: "<<pair_str<<std::endl;
+	std::cout<<"卖一价: ";
+	std::cout.width(15);
+	std::cout<<asks_pair_A.rate<<std::endl;
+	std::cout<<"买一价: ";
+	std::cout.width(15);
+	std::cout<<bids_pair_B.rate<<std::endl;
+
+	std::cout<<"卖一价: ";
+	std::cout.width(15);
+	std::cout<<asks_pair_B.rate<<std::endl;
+	std::cout<<"买一价: ";
+	std::cout.width(15);
+	std::cout<<bids_pair_A.rate<<std::endl;
+	if(asks_pair_A.rate<bids_pair_B.rate){
             //收益率计算，不考虑手续费
             compare_price(asks_pair_A,bids_pair_B);
         }
