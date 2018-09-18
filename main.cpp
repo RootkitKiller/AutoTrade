@@ -42,27 +42,27 @@ void find_pair(std::shared_ptr<ExchangeFac> exchange_A,std::shared_ptr<ExchangeF
         //交易所的卖一大于买一
         //如果A交易所的卖一价 小于 B交易所的买一价，则根据深度吃掉A交易所的卖一/吃掉自身余额（规避风险，吃单共分成10次），反之亦然
         std::cout<<"交易对: "<<pair_str<<std::endl;
-	std::cout<<"卖一价: ";
-	std::cout.width(15);
-	std::cout<<asks_pair_A.rate<<std::endl;
-	std::cout<<"买一价: ";
-	std::cout.width(15);
-	std::cout<<bids_pair_B.rate<<std::endl;
+        std::cout<<"卖一价: ";
+        std::cout.width(15);
+        std::cout<<asks_pair_A.rate<<std::endl;
+        std::cout<<"买一价: ";
+        std::cout.width(15);
+        std::cout<<bids_pair_B.rate<<std::endl;
 
-	std::cout<<"卖一价: ";
-	std::cout.width(15);
-	std::cout<<asks_pair_B.rate<<std::endl;
-	std::cout<<"买一价: ";
-	std::cout.width(15);
-	std::cout<<bids_pair_A.rate<<std::endl;
-	if(asks_pair_A.rate<bids_pair_B.rate){
-            //收益率计算，不考虑手续费
-            compare_price(asks_pair_A,bids_pair_B);
+        std::cout<<"卖一价: ";
+        std::cout.width(15);
+        std::cout<<asks_pair_B.rate<<std::endl;
+        std::cout<<"买一价: ";
+        std::cout.width(15);
+        std::cout<<bids_pair_A.rate<<std::endl;
+        if(asks_pair_A.rate<bids_pair_B.rate){
+                //收益率计算，不考虑手续费
+                compare_price(asks_pair_A,bids_pair_B);
+            }
+            if(asks_pair_B.rate<bids_pair_A.rate){
+                compare_price(asks_pair_B,bids_pair_A);
+            }
         }
-        if(asks_pair_B.rate<bids_pair_A.rate){
-            compare_price(asks_pair_B,bids_pair_A);
-        }
-    }
 }
 void print_pair(std::shared_ptr<std::vector<std::string>> p_list ){
     for(auto pair_str:*p_list){
@@ -103,8 +103,9 @@ int main() {
     //auto p_pair_list_b=exchange_B->print_market_list();
     //std::cout<<"Bibox支持的交易对"<<std::endl;
     //print_pair(exchange_B->print_market_list());
-    find_pair(exchange_A,exchange_B);
-    
+    //find_pair(exchange_A,exchange_B);
+
+    exchange_B->send_to_market(Trade("EOS_ETH",0,1.3,0.035));
 
     return 0;
 }
