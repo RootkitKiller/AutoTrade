@@ -73,8 +73,11 @@ double GateioExchange::print_pair_rate(const std::string pair_str) {
         try{
             auto json_result=previousTask.get();
             //std::cout<<atof(json_result["last"].as_string().c_str())<<std::endl;
-            std::string rate_str =json_result["last"].as_string();
-            current_pair_rate=atof(rate_str.c_str());
+	    if(json_result["last"].is_string()==true){
+            	std::string rate_str =json_result["last"].as_string();
+             	current_pair_rate=atof(rate_str.c_str());
+	    }else
+		current_pair_rate=0;
         }
         catch (http_exception const & e){
             std::cout << e.what() << std::endl;

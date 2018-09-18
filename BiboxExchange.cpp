@@ -28,7 +28,27 @@ std::shared_ptr<std::vector<std::string>> BiboxExchange::print_market_list() {
 }
 
 double BiboxExchange::print_pair_rate(const std::string pair_str) {
-    return 0;
+    std::string fullstr="/v1/mdata?cmd=market&pair="+pair_str;
+    p_client->request(methods::GET,fullstr).then([&](http_response response)-> pplx::task<json::value>{
+        if(response.status_code() == status_codes::OK){
+            return response.extract_json();
+        }
+        return pplx::task_from_result(json::value());
+    }).then([&](pplx::task<json::value> previousTask){
+        try{
+            auto json_result=previousTask.get();
+            if(json_result["result"]["last"].is_string()==true){
+	    	auto rate_str=json_result["result"]["last"].as_string();
+	    	current_pair_rate=atof(rate_str.c_str());
+	    }else{
+		current_pair_rate=0;
+	    }
+        }
+        catch (http_exception const & e){
+            std::cout << e.what() << std::endl;
+        }
+    }).wait();
+    return current_pair_rate;
 }
 
 std::pair<std::shared_ptr<std::vector<Depth>>, std::shared_ptr<std::vector<Depth>>>
