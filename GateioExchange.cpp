@@ -15,21 +15,25 @@ std::pair<std::shared_ptr<std::vector<Depth>>,std::shared_ptr<std::vector<Depth>
     }).then([&](pplx::task<json::value> previousTask){
         try{
             auto json_result=previousTask.get();
-            //std::cout<<atof(json_result["last"].as_string().c_str())<<std::endl;
-            auto asks_array =json_result["asks"].as_array();
-            auto bids_array =json_result["bids"].as_array();
-            for(auto iter_asks_value:asks_array){
-                auto obj=Depth(atof(iter_asks_value[0].as_string().c_str()),atof(iter_asks_value[1].as_string().c_str()));
-                p_asks_depth->push_back(obj);
-                //std::cout<<iter_asks_value[0].as_string()<<std::endl;
-            }
-            for(auto iter_bids_value:bids_array){
-                auto obj=Depth(atof(iter_bids_value[0].as_string().c_str()),atof(iter_bids_value[1].as_string().c_str()));
-                p_bids_depth->push_back(obj);
+            if(json_result["asks"].is_array()== true &&
+                    json_result["bids"].is_array()== true) {
+                auto asks_array = json_result["asks"].as_array();
+                auto bids_array = json_result["bids"].as_array();
+                for (auto iter_asks_value:asks_array) {
+                    auto obj = Depth(atof(iter_asks_value[0].as_string().c_str()),
+                                     atof(iter_asks_value[1].as_string().c_str()));
+                    p_asks_depth->push_back(obj);
+                    //std::cout<<iter_asks_value[0].as_string()<<std::endl;
+                }
+                for (auto iter_bids_value:bids_array) {
+                    auto obj = Depth(atof(iter_bids_value[0].as_string().c_str()),
+                                     atof(iter_bids_value[1].as_string().c_str()));
+                    p_bids_depth->push_back(obj);
+                }
             }
         }
         catch (http_exception const & e){
-            std::cout << e.what() << std::endl;
+            std::cout << pair_str<<" 交易对发生异常，检查是否存在该交易对"<<e.what() << std::endl;
         }
     }).wait();
     //return std::pair<std::shared_ptr<std::vector<Depth>>, std::shared_ptr<std::vector<Depth>>>();

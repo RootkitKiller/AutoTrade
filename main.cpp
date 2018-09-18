@@ -5,6 +5,16 @@
 #include "HuobiproExchange.h"
 
 //策略一：对比两个交易所差价最大的交易对，输出彼此交易价格，输出利率
+void compare_price(const Depth &asks_depth,const Depth &bids_depth){
+    //收益率计算，不考虑手续费
+    auto earn_yield=(bids_depth.rate-asks_depth.rate)*100/asks_depth.rate;
+    if(earn_yield>1){
+        std::cout<<"买入交易所的卖一数: "<<asks_depth.number<<std::endl;
+        std::cout<<"买入交易所的卖一价: "<<asks_depth.rate<<std::endl;
+        std::cout<<"卖出交易所的买一数: "<<bids_depth.number<<std::endl;
+        std::cout<<"卖出交易所的买一价: "<<bids_depth.rate<<std::endl;
+    }
+}
 void find_pair(std::shared_ptr<ExchangeFac> exchange_A,std::shared_ptr<ExchangeFac> exchange_B){
     auto p_pair_list_A=exchange_A->print_market_list();
     auto p_pair_list_B=exchange_B->print_market_list();
@@ -12,21 +22,29 @@ void find_pair(std::shared_ptr<ExchangeFac> exchange_A,std::shared_ptr<ExchangeF
     std::sort(p_pair_list_A->begin(),p_pair_list_A->end());
     std::sort(p_pair_list_B->begin(),p_pair_list_B->end());
     
-    std::vector<std::string> replace_pair_vec{"EOS_BTC","EOS_ETH","ETH_BTC","BTC_ETH","LTC_ETH","LTC_BTC"\
+    std::vector<std::string> replace_pair_vec{"EOS_BTC","EOS_ETH","ETH_BTC","LTC_ETH","LTC_BTC"\
                 ,"ETC_ETH","ETC_BTC","BCH_ETH","BCH_ETC"};
     //std::set_intersection(p_pair_list_A->begin(),p_pair_list_A->end(),\
                 //p_pair_list_B->begin(),p_pair_list_B->end(),std::back_inserter(replace_pair_vec));
     for(auto pair_str:replace_pair_vec){
-        auto pair_rate_A=exchange_A->print_pair_rate(pair_str);
-        auto pair_rate_B=exchange_B->print_pair_rate(pair_str);
-	if(pair_rate_A==0||pair_rate_B==0)
-	     continue;
-        auto get_rate=(pair_rate_A>pair_rate_B?(pair_rate_A-pair_rate_B)*100/pair_rate_B:\
-                (pair_rate_B-pair_rate_A)*100/pair_rate_A);
-        if(get_rate>1){
-            std::cout<<"第一个交易所: "<<pair_str<<"  "<<pair_rate_A<<std::endl;
-            std::cout<<"第二个交易所: "<<pair_str<<"  "<<pair_rate_B<<std::endl;
-            std::cout<<"盈利率: "<<get_rate<<std::endl;
+
+        //获得两个平台的卖一价和买一价
+        auto depth_pair_A =exchange_A->print_pair_depth(pair_str);
+        auto depth_pair_B =exchange_B->print_pair_depth(pair_str);
+        if(depth_pair_A.first->size()==0||depth_pair_B.first->size()==0)
+            continue;
+        auto asks_pair_A=depth_pair_A.first->back();    //卖一价
+        auto bids_pair_A=depth_pair_A.second->front();  //买一价
+        auto asks_pair_B=depth_pair_B.first->back();    //卖一价
+        auto bids_pair_B=depth_pair_B.second->front();  //买一价
+        //交易所的卖一大于买一
+        //如果A交易所的卖一价 小于 B交易所的买一价，则根据深度吃掉A交易所的卖一/吃掉自身余额（规避风险，吃单共分成10次），反之亦然
+        if(asks_pair_A.rate<bids_pair_B.rate){
+            //收益率计算，不考虑手续费
+            compare_price(asks_pair_A,bids_pair_B);
+        }
+        if(asks_pair_B.rate<bids_pair_A.rate){
+            compare_price(asks_pair_B,bids_pair_A);
         }
     }
 }
