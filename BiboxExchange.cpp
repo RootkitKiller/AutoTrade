@@ -112,7 +112,8 @@ void BiboxExchange::send_to_market(const Trade &trade_data) {
     rand_number++;
     cmd_data["body"]=body;
 
-    auto cmd_str_data=cmd_data.serialize();
+    auto cmd_str_data="["+cmd_data.serialize();
+    cmd_str_data=cmd_str_data+"]";
     HMAC_CTX ctx;
     HMAC_CTX_init(&ctx);
     HMAC_Init_ex(&ctx, Secret_Key.c_str(), strlen(Secret_Key.c_str()), EVP_md5(), NULL);
@@ -137,10 +138,11 @@ void BiboxExchange::send_to_market(const Trade &trade_data) {
     http_request curr_request(methods::POST);
     curr_request.set_request_uri(trade_uri);
     json::value request_body;
-    request_body["cmds"]=cmd_data;
+    //request_body["cmds"]=cmd_data;
+    request_body["cmds"]=json::value::string(cmd_str_data);
     request_body["apikey"]=json::value::string(AccessKeyId);
     request_body["sign"]=json::value::string(pBuffer);
-    curr_request.set_body(request_body.serialize());
+    curr_request.set_body(request_body);
 
     p_client->request(curr_request).then([&](http_response response)-> pplx::task<json::value>{
         if(response.status_code() == status_codes::OK){
