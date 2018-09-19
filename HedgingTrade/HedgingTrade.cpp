@@ -6,6 +6,7 @@
 #include "HedgingTrade.h"
 #include <iostream>
 #include <thread>
+#include <unistd.h>
 
 void HedgingTrade::compare_price(const Depth &asks_depth, const Depth &bids_depth) {
     //收益率计算，不考虑手续费
@@ -23,12 +24,19 @@ void HedgingTrade::compare_price(const Depth &asks_depth, const Depth &bids_dept
 
 void HedgingTrade::thread_single(std::shared_ptr<ExchangeFac> exc_first, std::shared_ptr<ExchangeFac> exc_second,
                                  std::string pair) {
+    size_t thread_count=0;
     while(true) {
+        thread_count++;
+        if(thread_count>10000)
+            break;
         //获得两个平台的卖一价和买一价
         auto depth_pair_A = exc_first->print_pair_depth(pair);
         auto depth_pair_B = exc_second->print_pair_depth(pair);
-        if (depth_pair_A.first->size() == 0 || depth_pair_B.first->size() == 0)
-            return;
+        if (depth_pair_A.first->size() == 0 || depth_pair_B.first->size() == 0) {
+            std::cout<<depth_pair_A.first->size()<<std::endl;
+            std::cout<<depth_pair_B.first->size()<<std::endl;
+            continue;
+        }
         auto asks_pair_A = depth_pair_A.first->back();    //卖一价
         auto bids_pair_A = depth_pair_A.second->front();  //买一价
         auto asks_pair_B = depth_pair_B.first->back();    //卖一价
@@ -56,6 +64,7 @@ void HedgingTrade::thread_single(std::shared_ptr<ExchangeFac> exc_first, std::sh
         if (asks_pair_B.rate < bids_pair_A.rate) {
             compare_price(asks_pair_B, bids_pair_A);
         }
+        sleep(10000);
     }
 }
 
