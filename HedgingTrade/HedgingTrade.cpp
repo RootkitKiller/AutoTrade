@@ -106,7 +106,7 @@ void HedgingTrade::auto_trade(std::shared_ptr<ExchangeFac> exc_first, std::share
         }
     }*/
     std::thread single_monitor(&HedgingTrade::thread_single,this,exc_first,exc_second,pair_str);
-    single_monitor.detach();
+    single_monitor.join();
 
     std::cout<<"当前交易所:"<<exc_first->get_exchange_name()<<"     "<<exc_second->get_exchange_name()<<std::endl;
     std::cout<<pair_str<<" 交易对正在监控~~~~~~"<<std::endl;

@@ -8,7 +8,7 @@ IF(APPLE)
     link_directories("/usr/local/opt/openssl/lib")
     include_directories("/usr/local/opt/openssl/include")
 ENDIF(APPLE)
-
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread")
 
 
 add_executable(AutoTrace main.cpp ExchangeFac.cpp ExchangeFac.h
