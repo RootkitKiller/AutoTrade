@@ -126,3 +126,60 @@ void GateioExchange::send_to_market(const Trade &trade_data) {
 
     delete[] pEncode_buffer;
 }
+
+void GateioExchange::get_balance(json::value json_result) {
+    m_balance=json_result;
+    //std::cout<<json_result<<std::endl;
+}
+
+double GateioExchange::print_balance(const std::string symbol) {
+    // /api2/1/private/balances
+    //1 给交易签名 SHA512 格式：key=value&key=value&key=value
+    std::string be_sign_data="";
+    //2 签名过程
+    HMAC_CTX ctx;
+    HMAC_CTX_init(&ctx);
+    HMAC_Init_ex(&ctx, Secret_Key.c_str(), strlen(Secret_Key.c_str()), EVP_sha512(), NULL);
+    HMAC_Update(&ctx, (unsigned char*)(be_sign_data.c_str()), be_sign_data.size());
+    unsigned char* pEncode_buffer = new unsigned char[EVP_MAX_MD_SIZE];
+    uint32_t buffer_length=0;
+    HMAC_Final(&ctx, pEncode_buffer, &buffer_length);
+    HMAC_CTX_cleanup(&ctx);
+
+    //encode to degist
+    char buf[129];
+    for (int i=0; i<64; i++)
+        sprintf(buf+i*2, "%02x", pEncode_buffer[i]);
+    buf[128]=0;
+    std::string pBuffer(buf);
+    //std::cout<<pBuffer<<std::endl;
+
+    //3 买入/卖出
+
+    http_request curr_request(methods::POST);
+    curr_request.headers().add("Content-Type","application/x-www-form-urlencoded");
+    curr_request.headers().add("KEY",AccessKeyId);
+    curr_request.headers().add("SIGN",pBuffer);
+    curr_request.set_request_uri("/api2/1/private/balances");
+    curr_request.set_body(be_sign_data);
+
+    callFunction get_result=std::bind(&GateioExchange::get_balance,this,std::placeholders::_1);
+    HttpRequest::send_request(rest_addr,curr_request,get_result);
+
+    //4 请求会阻塞到完成 校验回调函数的结果
+    if(m_balance["result"].as_string()=="true"){
+        if(m_balance["available"].is_array()== true){
+            return 0;
+        }else{
+            auto balance_list=m_balance["available"];
+            if(balance_list.has_string_field(symbol)== false){
+                return 0;
+            }else{
+                return atof(balance_list[symbol].as_string().c_str());
+            }
+            //std::cout<<balance_list["ETH"]<<std::endl;
+        }
+    }
+    delete[] pEncode_buffer;
+    return 0;
+}

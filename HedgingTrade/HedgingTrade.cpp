@@ -8,7 +8,7 @@
 #include <thread>
 #include <unistd.h>
 
-void HedgingTrade::compare_price(const Depth &asks_depth, const Depth &bids_depth) {
+bool HedgingTrade::compare_price(const Depth &asks_depth, const Depth &bids_depth) {
     //收益率计算，不考虑手续费
     auto earn_yield=(bids_depth.rate-asks_depth.rate)*100/asks_depth.rate;
     std::cout<<"当前利率: "<<earn_yield<<"% "<<std::endl;
@@ -19,6 +19,9 @@ void HedgingTrade::compare_price(const Depth &asks_depth, const Depth &bids_dept
         std::cout<<"卖出交易所的买一价: "<<bids_depth.rate<<std::endl;
         std::cout<<"毛利率: "<<earn_yield<<"%"<<std::endl;
         std::cout<<std::endl;
+        return true;
+    }else{
+        return false;
     }
 }
 
@@ -59,7 +62,12 @@ void HedgingTrade::thread_single(std::shared_ptr<ExchangeFac> exc_first, std::sh
         std::cout << bids_pair_A.rate << std::endl;
         if (asks_pair_A.rate < bids_pair_B.rate) {
             //收益率计算，不考虑手续费
-            compare_price(asks_pair_A, bids_pair_B);
+            if(compare_price(asks_pair_A, bids_pair_B)==true){
+                // 计算吃单的数目（卖一数与买一数的最小值）
+                auto trade_num=(asks_pair_A.number>bids_pair_B.number)?bids_pair_B.number:asks_pair_A.number;
+                // 获取A交易所基准币的余额，获取B交易所操作币的余额
+                //trade_num=(trade_num>)
+            }
         }
         if (asks_pair_B.rate < bids_pair_A.rate) {
             compare_price(asks_pair_B, bids_pair_A);

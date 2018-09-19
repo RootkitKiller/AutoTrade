@@ -27,12 +27,14 @@ public:
                     print_pair_depth(const std::string pair_str);               //输出某个交易对的深度
 
     virtual void send_to_market(const Trade & trade_data);                      //发送交易接口
+    virtual double print_balance(const std::string symbol);
 
 private:
     void get_market_list(json::value json_result);
     void get_pair_rate(json::value json_result);
     void get_pair_depth(json::value json_result);
     void get_trade_result(json::value json_result);
+    void get_balance(json::value json_result);
 
     typedef  std::function<void(json::value json_result)> callFunction;
 };

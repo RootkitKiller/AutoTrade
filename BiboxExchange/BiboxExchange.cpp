@@ -180,7 +180,7 @@ void BiboxExchange::send_to_market(const Trade &trade_data) {
     HMAC_CTX ctx;
     HMAC_CTX_init(&ctx);
     HMAC_Init_ex(&ctx, Secret_Key.c_str(), strlen(Secret_Key.c_str()), EVP_md5(), NULL);
-    HMAC_Update(&ctx, (unsigned char*)(cmd_str_data.c_str()), cmd_str_data.size());        // input is OK; &input is WRONG !!!
+    HMAC_Update(&ctx, (unsigned char*)(cmd_str_data.c_str()), cmd_str_data.size());
     unsigned char* pEncode_buffer = new unsigned char[EVP_MAX_MD_SIZE];
     uint32_t buffer_length=0;
     HMAC_Final(&ctx, pEncode_buffer, &buffer_length);
@@ -207,24 +207,64 @@ void BiboxExchange::send_to_market(const Trade &trade_data) {
     request_body["sign"]=json::value::string(pBuffer);
     curr_request.set_body(request_body);
 
-    /*
-    p_client->request(curr_request).then([&](http_response response)-> pplx::task<json::value>{
-        if(response.status_code() == status_codes::OK){
-            return response.extract_json();
-        }
-        return pplx::task_from_result(json::value());
-    }).then([&](pplx::task<json::value> previousTask){
-        try{
-            auto json_result=previousTask.get();
-            std::cout<<json_result<<std::endl;
-        }
-        catch (http_exception const & e){
-            std::cout << e.what() << std::endl;
-        }
-    }).wait();*/
+
 
     callFunction get_result=std::bind(&BiboxExchange::get_trade_result,this,std::placeholders::_1);
     HttpRequest::send_request(rest_addr,curr_request,get_result);
 
     delete[] pEncode_buffer;
+}
+
+void BiboxExchange::get_balance(json::value json_result) {
+    std::cout<<json_result<<std::endl;
+}
+
+double BiboxExchange::print_balance(const std::string symbol) {
+
+    //1 构建请求参数
+    json::value body;
+    body["select"]=json::value::number(1);
+
+    json::value cmd_data;
+    cmd_data["cmd"]=json::value::string("transfer/assets");
+
+    cmd_data["body"]=body;
+
+    auto cmd_str_data="["+cmd_data.serialize();
+    cmd_str_data=cmd_str_data+"]";
+    HMAC_CTX ctx;
+    HMAC_CTX_init(&ctx);
+    HMAC_Init_ex(&ctx, Secret_Key.c_str(), strlen(Secret_Key.c_str()), EVP_md5(), NULL);
+    HMAC_Update(&ctx, (unsigned char*)(cmd_str_data.c_str()), cmd_str_data.size());
+    unsigned char* pEncode_buffer = new unsigned char[EVP_MAX_MD_SIZE];
+    uint32_t buffer_length=0;
+    HMAC_Final(&ctx, pEncode_buffer, &buffer_length);
+    HMAC_CTX_cleanup(&ctx);
+
+    //std::cout<<pEncode_buffer<<std::endl;
+    //encode to degist
+    char buf[33];
+    for (int i=0; i<16; i++)
+        sprintf(buf+i*2, "%02x", pEncode_buffer[i]);
+    buf[32]=0;
+    std::string pBuffer(buf);
+    std::cout<<pBuffer<<std::endl;
+
+
+    //3 获取资产详细
+    std::string trade_uri="/v1/transfer";
+    http_request curr_request(methods::POST);
+    curr_request.set_request_uri(trade_uri);
+    json::value request_body;
+    //request_body["cmds"]=cmd_data;
+    request_body["cmds"]=json::value::string(cmd_str_data);
+    request_body["apikey"]=json::value::string(AccessKeyId);
+    request_body["sign"]=json::value::string(pBuffer);
+    curr_request.set_body(request_body);
+
+    callFunction get_result=std::bind(&BiboxExchange::get_balance,this,std::placeholders::_1);
+    HttpRequest::send_request(rest_addr,curr_request,get_result);
+
+    delete[] pEncode_buffer;
+    return 0;
 }

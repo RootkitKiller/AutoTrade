@@ -52,6 +52,7 @@ public:
                     print_pair_depth(const std::string pair_str)=0;                 //输出某个交易对的深度
 
     virtual void send_to_market(const Trade & trade_data)=0;                        //发送交易接口
+    virtual double print_balance(const std::string symbol)=0;                         //获取代币余额
     std::string get_exchange_name(){                                                //获取交易所名称
         return exchange_name;
     }
