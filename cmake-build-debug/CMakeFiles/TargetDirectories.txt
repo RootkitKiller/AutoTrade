@@ -1,0 +1,3 @@
+/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/CMakeFiles/AutoTrace.dir

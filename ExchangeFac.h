@@ -9,16 +9,9 @@
 #include <memory>
 #include <string>
 
-#include <cpprest/http_client.h>
-#include <cpprest/filestream.h>
-using namespace utility;
-using namespace web;
-using namespace web::http;
-using namespace web::http::client;
-
 namespace exc_trade {
-    const bool SELL = false;
-    const bool BUY = true;
+    const bool BUY = false;
+    const bool SELL = true;
 }
 
 struct Trade{
@@ -36,15 +29,31 @@ struct Depth{
     Depth(double rate_arg,double number_arg):rate(rate_arg),number(number_arg){}
 };
 class ExchangeFac {
+protected:
+    std::string rest_addr;                                                          //Rest API 地址
+    std::string exchange_name;                                                      //交易所名称
+
+    std::string AccessKeyId;                                                        //apikey
+    std::string Secret_Key;                                                         //apikey 密码
+    std::shared_ptr<std::vector<Depth>> p_asks_depth;                               //当前交易对的买盘深度
+    std::shared_ptr<std::vector<Depth>> p_bids_depth;                               //当前交易对的卖盘深度
+    double current_pair_rate;                                                       //当前交易对的价格
+    std::shared_ptr<std::vector<std::string>> p_pair_list;                          //交易所支持的交易对
+
+
+
 public:
 
-    virtual std::shared_ptr<std::vector<std::string>> print_market_list()=0;    //输出交易对列表
+    virtual std::shared_ptr<std::vector<std::string>> print_market_list()=0;        //输出交易对列表
 
-    virtual double print_pair_rate(const std::string pair_str)=0;               //输出某个交易对的最新成交价(示例: BTC_ETH)
+    virtual double print_pair_rate(const std::string pair_str)=0;                   //输出某个交易对的最新成交价(示例: BTC_ETH)
     virtual std::pair<std::shared_ptr<std::vector<Depth>>,std::shared_ptr<std::vector<Depth>>> \
-                    print_pair_depth(const std::string pair_str)=0;             //输出某个交易对的深度
+                    print_pair_depth(const std::string pair_str)=0;                 //输出某个交易对的深度
 
-    virtual void send_to_market(const Trade & trade_data)=0;                    //发送交易接口
+    virtual void send_to_market(const Trade & trade_data)=0;                        //发送交易接口
+    std::string get_exchange_name(){                                                //获取交易所名称
+        return exchange_name;
+    }
 
     virtual ~ExchangeFac()  = default;
 };

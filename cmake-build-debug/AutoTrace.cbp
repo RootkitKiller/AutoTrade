@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="AutoTrace"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="AutoTrace">
+				<Option output="/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/AutoTrace" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/local/opt/openssl/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 AutoTrace"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="AutoTrace/fast">
+				<Option output="/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/AutoTrace" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/local/opt/openssl/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 AutoTrace/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/mooninwater/CLionProjects/AutoTrace/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/BiboxExchange/BiboxExchange.cpp">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/BiboxExchange/BiboxExchange.h">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/ExchangeFac.cpp">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/ExchangeFac.h">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/GateioExchange/GateioExchange.cpp">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/GateioExchange/GateioExchange.h">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/HedgingTrade/HedgingTrade.cpp">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/HedgingTrade/HedgingTrade.h">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/HttpRequest.cpp">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/HttpRequest.h">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/HuobiproExchange/HuobiproExchange.cpp">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/HuobiproExchange/HuobiproExchange.h">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/HuobiproExchange/base64.cpp">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/HuobiproExchange/base64.h">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/HuobiproExchange/hmac-sha256.cpp">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/HuobiproExchange/hmac-sha256.h">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/TradeBase.cpp">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/TradeBase.h">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/ZBExchange/ZBExchange.cpp">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/ZBExchange/ZBExchange.h">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/main.cpp">
+			<Option target="AutoTrace"/>
+		</Unit>
+		<Unit filename="/Users/mooninwater/CLionProjects/AutoTrace/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
