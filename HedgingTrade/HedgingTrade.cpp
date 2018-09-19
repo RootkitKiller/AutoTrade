@@ -2,10 +2,10 @@
 // Created by mooninwater on 2018/9/19.
 //
 
-#include <vector>
+
+#include "HedgingTrade.h"
 #include <iostream>
 #include <thread>
-#include "HedgingTrade.h"
 
 void HedgingTrade::compare_price(const Depth &asks_depth, const Depth &bids_depth) {
     //收益率计算，不考虑手续费
