@@ -23,39 +23,40 @@ void HedgingTrade::compare_price(const Depth &asks_depth, const Depth &bids_dept
 
 void HedgingTrade::thread_single(std::shared_ptr<ExchangeFac> exc_first, std::shared_ptr<ExchangeFac> exc_second,
                                  std::string pair) {
-    //获得两个平台的卖一价和买一价
-    auto depth_pair_A =exc_first->print_pair_depth(pair);
-    auto depth_pair_B =exc_second->print_pair_depth(pair);
-    if(depth_pair_A.first->size()==0||depth_pair_B.first->size()==0)
-        return;
-    auto asks_pair_A=depth_pair_A.first->back();    //卖一价
-    auto bids_pair_A=depth_pair_A.second->front();  //买一价
-    auto asks_pair_B=depth_pair_B.first->back();    //卖一价
-    auto bids_pair_B=depth_pair_B.second->front();  //买一价
-    //交易所的卖一大于买一
-    //如果A交易所的卖一价 小于 B交易所的买一价，则根据深度吃掉A交易所的卖一/吃掉自身余额（规避风险，吃单共分成10次），反之亦然
-    std::cout<<"交易对: "<<pair<<std::endl;
-    std::cout<<"卖一价: ";
-    std::cout.width(15);
-    std::cout<<asks_pair_A.rate<<std::endl;
-    std::cout<<"买一价: ";
-    std::cout.width(15);
-    std::cout<<bids_pair_B.rate<<std::endl;
+    while(true) {
+        //获得两个平台的卖一价和买一价
+        auto depth_pair_A = exc_first->print_pair_depth(pair);
+        auto depth_pair_B = exc_second->print_pair_depth(pair);
+        if (depth_pair_A.first->size() == 0 || depth_pair_B.first->size() == 0)
+            return;
+        auto asks_pair_A = depth_pair_A.first->back();    //卖一价
+        auto bids_pair_A = depth_pair_A.second->front();  //买一价
+        auto asks_pair_B = depth_pair_B.first->back();    //卖一价
+        auto bids_pair_B = depth_pair_B.second->front();  //买一价
+        //交易所的卖一大于买一
+        //如果A交易所的卖一价 小于 B交易所的买一价，则根据深度吃掉A交易所的卖一/吃掉自身余额（规避风险，吃单共分成10次），反之亦然
+        std::cout << "交易对: " << pair << std::endl;
+        std::cout << "卖一价: ";
+        std::cout.width(15);
+        std::cout << asks_pair_A.rate << std::endl;
+        std::cout << "买一价: ";
+        std::cout.width(15);
+        std::cout << bids_pair_B.rate << std::endl;
 
-    std::cout<<"卖一价: ";
-    std::cout.width(15);
-    std::cout<<asks_pair_B.rate<<std::endl;
-    std::cout<<"买一价: ";
-    std::cout.width(15);
-    std::cout<<bids_pair_A.rate<<std::endl;
-    if(asks_pair_A.rate<bids_pair_B.rate){
-        //收益率计算，不考虑手续费
-        compare_price(asks_pair_A,bids_pair_B);
+        std::cout << "卖一价: ";
+        std::cout.width(15);
+        std::cout << asks_pair_B.rate << std::endl;
+        std::cout << "买一价: ";
+        std::cout.width(15);
+        std::cout << bids_pair_A.rate << std::endl;
+        if (asks_pair_A.rate < bids_pair_B.rate) {
+            //收益率计算，不考虑手续费
+            compare_price(asks_pair_A, bids_pair_B);
+        }
+        if (asks_pair_B.rate < bids_pair_A.rate) {
+            compare_price(asks_pair_B, bids_pair_A);
+        }
     }
-    if(asks_pair_B.rate<bids_pair_A.rate){
-        compare_price(asks_pair_B,bids_pair_A);
-    }
-
 }
 
 void HedgingTrade::auto_trade(std::shared_ptr<ExchangeFac> exc_first, std::shared_ptr<ExchangeFac> exc_second) {
