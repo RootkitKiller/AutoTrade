@@ -94,6 +94,7 @@ void BiboxExchange::get_pair_depth(json::value json_result) {
                              atof(iter_asks_value["volume"].as_string().c_str()));
             p_asks_depth->push_back(asks_depth);
         }
+	std::reverse(p_asks_depth->begin(),p_asks_depth->end());
         for (auto iter_bids_value:bids_array) {
             auto bids_depth = Depth(atof(iter_bids_value["price"].as_string().c_str()),
                              atof(iter_bids_value["volume"].as_string().c_str()));
@@ -216,7 +217,8 @@ void BiboxExchange::send_to_market(const Trade &trade_data) {
 }
 
 void BiboxExchange::get_balance(json::value json_result) {
-    std::cout<<json_result<<std::endl;
+    m_balance=json_result;
+    //std::cout<<json_result<<std::endl;
 }
 
 double BiboxExchange::print_balance(const std::string symbol) {
@@ -264,7 +266,25 @@ double BiboxExchange::print_balance(const std::string symbol) {
 
     callFunction get_result=std::bind(&BiboxExchange::get_balance,this,std::placeholders::_1);
     HttpRequest::send_request(rest_addr,curr_request,get_result);
-
+    
+    
+    // 4 解析结果并返回
+    if(m_balance["result"].is_array()==true){
+        auto result=m_balance["result"][0]["result"];
+        auto symbol_list=result["assets_list"];
+        if(symbol_list.is_array()== true){
+                        for(auto iter=symbol_list.as_array().begin();iter!=symbol_list.as_array().end();iter++){
+                if((*iter)["coin_symbol"].as_string()==symbol){
+                    return atof((*iter)["balance"].as_string().c_str());
+                }
+            }
+            return 0;
+        }else{
+            return 0;
+        }
+    }else{
+        return 0;
+    }
     delete[] pEncode_buffer;
     return 0;
 }

@@ -35,7 +35,7 @@ private:
     void get_pair_depth(json::value json_result);
     void get_trade_result(json::value json_result);
     void get_balance(json::value json_result);
-
+    json::value m_balance; 
     typedef  std::function<void(json::value json_result)> callFunction;
 };
 

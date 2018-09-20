@@ -24,5 +24,5 @@ add_executable(AutoTrace main.cpp ExchangeFac.cpp ExchangeFac.h
 IF(APPLE)
     target_link_libraries(AutoTrace cpprest ssl crypto boost_system boost_chrono boost_thread-mt)
 ELSEIF(UNIX)
-    target_link_libraries(AutoTrace cpprest ssl crypto boost_system boost_chrono boost_thread)
+    target_link_libraries(AutoTrace cpprest ssl crypto boost_system boost_chrono boost_thread) 
 ENDIF()
