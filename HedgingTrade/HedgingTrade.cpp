@@ -7,6 +7,7 @@
 #include <iostream>
 #include <thread>
 #include <unistd.h>
+#include <algorithm> 
 
 bool HedgingTrade::compare_price(const Depth &asks_depth, const Depth &bids_depth) {
     //收益率计算，不考虑手续费
@@ -20,7 +21,7 @@ bool HedgingTrade::compare_price(const Depth &asks_depth, const Depth &bids_dept
 }
 
 void HedgingTrade::print_log(std::shared_ptr<ExchangeFac> exchange,std::string pair, double buy_rate, double sell_rate) {
-
+    std::cout.width(10);
     std::cout<<exchange->get_exchange_name()<<"（交易所）";
     std::cout<<"    "<<pair<<"（交易对）";
     std::cout.width(15);
@@ -44,9 +45,12 @@ void HedgingTrade::trade(std::shared_ptr<ExchangeFac> exchange_buy, Depth& asks_
     auto base_num=exchange_buy->print_balance(base_symbol);    //比较两个交易所的卖一数与买一数，得出购买数1
     auto can_buy_num=base_num/asks_1.rate;
     auto op_num=exchange_sell->print_balance(op_symbol);
+	if(base_num==0||op_num==0){
+		return;
+	}
     auto buy_num=(can_buy_num>op_num)?op_num:can_buy_num;   //比较两个交易所的余额，得出购买数2
     auto number=(trade_num>buy_num)?buy_num:trade_num;      //number为交易数量 A交易所买入 B交易所卖出
-
+    
     //3 对冲交易
     //exchange_buy->send_to_market(Trade(pair,exc_trade::BUY,number,asks_1.rate));
     //exchange_sell->send_to_market(Trade(pair,exc_trade::SELL,number,bids_1.rate));
@@ -89,10 +93,13 @@ void HedgingTrade::thread_single(std::shared_ptr<ExchangeFac> exc_first, std::sh
         if (asks_pair_A.rate < bids_pair_B.rate) {
             //收益率计算，不考虑手续费
             if(compare_price(asks_pair_A, bids_pair_B)==true){
-            }
+            	trade(exc_first,asks_pair_A,exc_second,bids_pair_B,pair);
+		}
         }
         if (asks_pair_B.rate < bids_pair_A.rate) {
-            compare_price(asks_pair_B, bids_pair_A);
+            if(compare_price(asks_pair_B, bids_pair_A)==true){
+		trade(exc_second,asks_pair_B,exc_first,bids_pair_A,pair);
+		}
         }
         exc_first->get_mutex().unlock();
         exc_second->get_mutex().unlock();
