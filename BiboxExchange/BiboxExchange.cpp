@@ -12,26 +12,7 @@ void BiboxExchange::get_market_list(json::value json_result) {
 }
 
 std::shared_ptr<std::vector<std::string>> BiboxExchange::print_market_list() {
-    /*
-    p_client->request(methods::GET,"/v1/mdata?cmd=pairList").then([&](http_response response)-> pplx::task<json::value>{
-        if(response.status_code() == status_codes::OK){
-            return response.extract_json();
-        }
-        return pplx::task_from_result(json::value());
-    }).then([&](pplx::task<json::value> previousTask){
-        try{
-            auto json_result=previousTask.get();
-            auto list_array=json_result["result"].as_array();
-            for(auto pair:list_array){
-                //std::cout<<pair["id"]<<std::endl;
-                //std::cout<<pair["pair"]<<std::endl;
-                p_pair_list->push_back(pair["pair"].as_string());
-            }
-        }
-        catch (http_exception const & e){
-            std::cout << e.what() << std::endl;
-        }
-    }).wait();*/
+
     http_request requests(methods::GET);
     requests.set_request_uri("/v1/mdata?cmd=pairList");
 
@@ -52,26 +33,6 @@ void BiboxExchange::get_pair_rate(json::value json_result) {
 
 double BiboxExchange::print_pair_rate(const std::string pair_str) {
 
-    /*
-    p_client->request(methods::GET,fullstr).then([&](http_response response)-> pplx::task<json::value>{
-        if(response.status_code() == status_codes::OK){
-            return response.extract_json();
-        }
-        return pplx::task_from_result(json::value());
-    }).then([&](pplx::task<json::value> previousTask){
-        try{
-            auto json_result=previousTask.get();
-            if(json_result["result"]["last"].is_string()==true){
-	    	auto rate_str=json_result["result"]["last"].as_string();
-	    	current_pair_rate=atof(rate_str.c_str());
-	    }else{
-		current_pair_rate=0;
-	    }
-        }
-        catch (http_exception const & e){
-            std::cout << e.what() << std::endl;
-        }
-    }).wait();*/
     http_request requests(methods::GET);
     std::string fullstr="/v1/mdata?cmd=market&pair="+pair_str;
     requests.set_request_uri(fullstr);
@@ -94,7 +55,7 @@ void BiboxExchange::get_pair_depth(json::value json_result) {
                              atof(iter_asks_value["volume"].as_string().c_str()));
             p_asks_depth->push_back(asks_depth);
         }
-	std::reverse(p_asks_depth->begin(),p_asks_depth->end());
+	    std::reverse(p_asks_depth->begin(),p_asks_depth->end());
         for (auto iter_bids_value:bids_array) {
             auto bids_depth = Depth(atof(iter_bids_value["price"].as_string().c_str()),
                              atof(iter_bids_value["volume"].as_string().c_str()));
@@ -108,40 +69,7 @@ BiboxExchange::print_pair_depth(const std::string pair_str) {
 
     std::string fullstr="v1/mdata?cmd=depth&pair="+pair_str;
     fullstr+="&size=10";
-    /*
-    p_client->request(methods::GET,fullstr).then([&](http_response response)-> pplx::task<json::value>{
-        if(response.status_code() == status_codes::OK){
-            return response.extract_json();
-        }
-        return pplx::task_from_result(json::value());
-    }).then([&](pplx::task<json::value> previousTask){
-        try{
-            auto json_ret=previousTask.get();
-            auto json_result=json_ret["result"];
-	    p_asks_depth.reset(new std::vector<Depth>);
-            p_bids_depth.reset(new std::vector<Depth>);
-            if(json_result["asks"].is_array()== true &&
-               json_result["bids"].is_array()== true) {
-                auto asks_array = json_result["asks"].as_array();
-                auto bids_array = json_result["bids"].as_array();
-                for (auto iter_asks_value:asks_array) {
-                    auto obj = Depth(atof(iter_asks_value["price"].as_string().c_str()),
-                                     atof(iter_asks_value["volume"].as_string().c_str()));
-                    p_asks_depth->push_back(obj);
-                    //std::cout<<iter_asks_value[0].as_string()<<std::endl;
-                }
-                for (auto iter_bids_value:bids_array) {
-                    auto obj = Depth(atof(iter_bids_value["price"].as_string().c_str()),
-                                     atof(iter_bids_value["volume"].as_string().c_str()));
-                    p_bids_depth->push_back(obj);
-                }
-            }
-        }
-        catch (http_exception const & e){
-            std::cout << pair_str<<" 交易对发生异常，检查是否存在该交易对"<<e.what() << std::endl;
-        }
-    }).wait();
-     */
+
     http_request requests(methods::GET);
     requests.set_request_uri(fullstr);
 
@@ -266,8 +194,8 @@ double BiboxExchange::print_balance(const std::string symbol) {
 
     callFunction get_result=std::bind(&BiboxExchange::get_balance,this,std::placeholders::_1);
     HttpRequest::send_request(rest_addr,curr_request,get_result);
-    
-    
+
+    delete[] pEncode_buffer;
     // 4 解析结果并返回
     if(m_balance["result"].is_array()==true){
         auto result=m_balance["result"][0]["result"];
@@ -285,6 +213,5 @@ double BiboxExchange::print_balance(const std::string symbol) {
     }else{
         return 0;
     }
-    delete[] pEncode_buffer;
-    return 0;
+
 }

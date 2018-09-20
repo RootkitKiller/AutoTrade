@@ -22,6 +22,9 @@ private:
 
     void thread_single(std::shared_ptr<ExchangeFac> exc_first,\
                     std::shared_ptr<ExchangeFac> exc_second,std::string pair);
+    void print_log(std::shared_ptr<ExchangeFac> exchange,std::string pair,double buy_rate,double sell_rate);
+    void trade(std::shared_ptr<ExchangeFac> exchange_buy,Depth& asks_1,\
+                std::shared_ptr<ExchangeFac> exchange_sell,Depth& bids_1,std::string pair);
 };
 
 

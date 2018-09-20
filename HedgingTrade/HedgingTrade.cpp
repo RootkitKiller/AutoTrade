@@ -13,16 +13,47 @@ bool HedgingTrade::compare_price(const Depth &asks_depth, const Depth &bids_dept
     auto earn_yield=(bids_depth.rate-asks_depth.rate)*100/asks_depth.rate;
     std::cout<<"当前利率: "<<earn_yield<<"% "<<std::endl;
     if(earn_yield>earn_rate){
-        std::cout<<"买入交易所的卖一数: "<<asks_depth.number<<std::endl;
-        std::cout<<"买入交易所的卖一价: "<<asks_depth.rate<<std::endl;
-        std::cout<<"卖出交易所的买一数: "<<bids_depth.number<<std::endl;
-        std::cout<<"卖出交易所的买一价: "<<bids_depth.rate<<std::endl;
-        std::cout<<"毛利率: "<<earn_yield<<"%"<<std::endl;
-        std::cout<<std::endl;
         return true;
     }else{
         return false;
     }
+}
+
+void HedgingTrade::print_log(std::shared_ptr<ExchangeFac> exchange,std::string pair, double buy_rate, double sell_rate) {
+
+    std::cout<<exchange->get_exchange_name()<<"（交易所）";
+    std::cout<<"    "<<pair<<"（交易对）";
+    std::cout.width(15);
+    std::cout<<buy_rate;
+    std::cout<<"（买一价）";
+    std::cout.width(15);
+    std::cout<<sell_rate;
+    std::cout<<"（卖一价）"<<std::endl;
+}
+
+void HedgingTrade::trade(std::shared_ptr<ExchangeFac> exchange_buy, Depth& asks_1,
+                         std::shared_ptr<ExchangeFac> exchange_sell, Depth& bids_1, std::string pair) {
+    //1 分割基准币与操作币
+    auto find_iter=std::find(pair.begin(),pair.end(),'_');
+    //auto find_index=pair.find("_");
+    std::string op_symbol(pair.begin(),find_iter);
+    std::string base_symbol(find_iter+1,pair.end());
+    //2 计算吃单数（买一、卖一、操作币余额、基准币购买数）的最小值
+    auto trade_num=(asks_1.number>bids_1.number)?bids_1.number:asks_1.number;
+    // 获取A交易所基准币的余额，获取B交易所操作币的余额
+    auto base_num=exchange_buy->print_balance(base_symbol);    //比较两个交易所的卖一数与买一数，得出购买数1
+    auto can_buy_num=base_num/asks_1.rate;
+    auto op_num=exchange_sell->print_balance(op_symbol);
+    auto buy_num=(can_buy_num>op_num)?op_num:can_buy_num;   //比较两个交易所的余额，得出购买数2
+    auto number=(trade_num>buy_num)?buy_num:trade_num;      //number为交易数量 A交易所买入 B交易所卖出
+
+    //3 对冲交易
+    //exchange_buy->send_to_market(Trade(pair,exc_trade::BUY,number,asks_1.rate));
+    //exchange_sell->send_to_market(Trade(pair,exc_trade::SELL,number,bids_1.rate));
+    std::cout<<"可吃单数: "<<number<<std::endl;
+    std::cout<<"吃单价: "<<asks_1.rate<<std::endl;
+    std::cout<<"卖出价: "<<bids_1.rate<<std::endl;
+    std::cout<<"收益: "<<(bids_1.rate-asks_1.rate)*number<<" "<<op_symbol<<std::endl;
 }
 
 void HedgingTrade::thread_single(std::shared_ptr<ExchangeFac> exc_first, std::shared_ptr<ExchangeFac> exc_second,
@@ -32,96 +63,46 @@ void HedgingTrade::thread_single(std::shared_ptr<ExchangeFac> exc_first, std::sh
         thread_count++;
         if(thread_count>10000)
             break;
-        //获得两个平台的卖一价和买一价
+        //获得两个平台的卖一价和买一价、价格，多个线程可能会修改交易对的深度信息，需要加锁
+        exc_first->get_mutex().lock();
+        exc_second->get_mutex().lock();
+
         auto depth_pair_A = exc_first->print_pair_depth(pair);
         auto depth_pair_B = exc_second->print_pair_depth(pair);
         if (depth_pair_A.first->size() == 0 || depth_pair_B.first->size() == 0) {
             std::cout<<depth_pair_A.first->size()<<std::endl;
             std::cout<<depth_pair_B.first->size()<<std::endl;
+            //解锁
+            exc_first->get_mutex().unlock();
+            exc_second->get_mutex().unlock();
             continue;
         }
         auto asks_pair_A = depth_pair_A.first->back();    //卖一价
         auto bids_pair_A = depth_pair_A.second->front();  //买一价
         auto asks_pair_B = depth_pair_B.first->back();    //卖一价
         auto bids_pair_B = depth_pair_B.second->front();  //买一价
-        //交易所的卖一大于买一
-        //如果A交易所的卖一价 小于 B交易所的买一价，则根据深度吃掉A交易所的卖一/吃掉自身余额（规避风险，吃单共分成10次），反之亦然
-        std::cout << "交易对: " << pair << std::endl;
-        std::cout << "卖一价: ";
-        std::cout.width(15);
-        std::cout << asks_pair_A.rate << std::endl;
-        std::cout << "买一价: ";
-        std::cout.width(15);
-        std::cout << bids_pair_B.rate << std::endl;
+        print_log(exc_first,pair,bids_pair_A.rate,asks_pair_A.rate);
+        print_log(exc_second,pair,bids_pair_B.rate,asks_pair_B.rate);
+        std::cout<<std::endl;
 
-        std::cout << "卖一价: ";
-        std::cout.width(15);
-        std::cout << asks_pair_B.rate << std::endl;
-        std::cout << "买一价: ";
-        std::cout.width(15);
-        std::cout << bids_pair_A.rate << std::endl;
+
         if (asks_pair_A.rate < bids_pair_B.rate) {
             //收益率计算，不考虑手续费
             if(compare_price(asks_pair_A, bids_pair_B)==true){
-                // 计算吃单的数目（卖一数与买一数的最小值）
-                auto trade_num=(asks_pair_A.number>bids_pair_B.number)?bids_pair_B.number:asks_pair_A.number;
-                // 获取A交易所基准币的余额，获取B交易所操作币的余额
-                //trade_num=(trade_num>)
             }
         }
         if (asks_pair_B.rate < bids_pair_A.rate) {
             compare_price(asks_pair_B, bids_pair_A);
         }
-        sleep(10000);
+        exc_first->get_mutex().unlock();
+        exc_second->get_mutex().unlock();
+
+        sleep(10);
     }
 }
 
 void HedgingTrade::auto_trade(std::shared_ptr<ExchangeFac> exc_first, std::shared_ptr<ExchangeFac> exc_second) {
-    /*auto p_pair_list_A=exc_first->print_market_list();
-    auto p_pair_list_B=exc_second->print_market_list();
 
-    std::sort(p_pair_list_A->begin(),p_pair_list_A->end());
-    std::sort(p_pair_list_B->begin(),p_pair_list_B->end());
-    std::vector<std::string> replace_pair_vec;
-//    std::vector<std::string> replace_pair_vec{"EOS_BTC","EOS_ETH","ETH_BTC","LTC_ETH","LTC_BTC"\
-                ,"ETC_ETH","ETC_BTC","BCH_ETH","BCH_ETC"};
-    std::set_intersection(p_pair_list_A->begin(),p_pair_list_A->end(),\
-                p_pair_list_B->begin(),p_pair_list_B->end(),std::back_inserter(replace_pair_vec));
-    for(auto pair_str:replace_pair_vec){
-
-        //获得两个平台的卖一价和买一价
-        auto depth_pair_A =exc_first->print_pair_depth(pair_str);
-        auto depth_pair_B =exc_second->print_pair_depth(pair_str);
-        if(depth_pair_A.first->size()==0||depth_pair_B.first->size()==0)
-            continue;
-        auto asks_pair_A=depth_pair_A.first->back();    //卖一价
-        auto bids_pair_A=depth_pair_A.second->front();  //买一价
-        auto asks_pair_B=depth_pair_B.first->back();    //卖一价
-        auto bids_pair_B=depth_pair_B.second->front();  //买一价
-        //交易所的卖一大于买一
-        //如果A交易所的卖一价 小于 B交易所的买一价，则根据深度吃掉A交易所的卖一/吃掉自身余额（规避风险，吃单共分成10次），反之亦然
-        std::cout<<"交易对: "<<pair_str<<std::endl;
-        std::cout<<"卖一价: ";
-        std::cout.width(15);
-        std::cout<<asks_pair_A.rate<<std::endl;
-        std::cout<<"买一价: ";
-        std::cout.width(15);
-        std::cout<<bids_pair_B.rate<<std::endl;
-
-        std::cout<<"卖一价: ";
-        std::cout.width(15);
-        std::cout<<asks_pair_B.rate<<std::endl;
-        std::cout<<"买一价: ";
-        std::cout.width(15);
-        std::cout<<bids_pair_A.rate<<std::endl;
-        if(asks_pair_A.rate<bids_pair_B.rate){
-            //收益率计算，不考虑手续费
-            compare_price(asks_pair_A,bids_pair_B);
-        }
-        if(asks_pair_B.rate<bids_pair_A.rate){
-            compare_price(asks_pair_B,bids_pair_A);
-        }
-    }*/
     std::thread single_monitor(&HedgingTrade::thread_single,this,exc_first,exc_second,pair_str);
     single_monitor.join();
 

@@ -166,24 +166,21 @@ double GateioExchange::print_balance(const std::string symbol) {
     callFunction get_result=std::bind(&GateioExchange::get_balance,this,std::placeholders::_1);
     HttpRequest::send_request(rest_addr,curr_request,get_result);
 
+    delete[] pEncode_buffer;
     //4 请求会阻塞到完成 校验回调函数的结果
     if(m_balance["result"].as_string()=="true"){
         if(m_balance["available"].is_array()== true){
-	    return 0;
+	        return 0;
         }else{
             auto balance_list=m_balance["available"];
             if(balance_list.has_field(symbol)== false){
-          //  auto symbol_num_str=balance_list[symbol];
-	//    std::cout<<symbol_num_str<<std::endl;
-	   // if(symbol_num_str==json::value::string("null")){
-	//	 std::cout<<"测"<<std::endl;  
-		 return 0;
+		        return 0;
             }else{
                 return atof(balance_list[symbol].as_string().c_str());
             }
-            //std::cout<<balance_list["ETH"]<<std::endl;
         }
+    }else{
+        return 0;
     }
-    delete[] pEncode_buffer;
-    return 0;
+
 }

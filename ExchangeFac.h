@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <mutex>
 
 namespace exc_trade {
     const bool BUY = false;
@@ -41,7 +42,7 @@ protected:
     double current_pair_rate;                                                       //当前交易对的价格
     std::shared_ptr<std::vector<std::string>> p_pair_list;                          //交易所支持的交易对
 
-
+    std::mutex mut_price_depth;                                                     //互斥量 给修改当前交易对价格深度加锁，防止同时修改
 
 public:
 
@@ -56,7 +57,9 @@ public:
     std::string get_exchange_name(){                                                //获取交易所名称
         return exchange_name;
     }
-
+    std::mutex& get_mutex(){
+        return mut_price_depth;
+    }
     virtual ~ExchangeFac()  = default;
 };
 
