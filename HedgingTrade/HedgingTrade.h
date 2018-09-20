@@ -15,6 +15,7 @@ public:
     virtual void auto_trade(std::shared_ptr<ExchangeFac> exc_first,\
                     std::shared_ptr<ExchangeFac> exc_second);
 
+
 private:
     std::string pair_str;                                                   //当前交易的交易对
 
@@ -25,6 +26,8 @@ private:
     void print_log(std::shared_ptr<ExchangeFac> exchange,std::string pair,double buy_rate,double sell_rate);
     void trade(std::shared_ptr<ExchangeFac> exchange_buy,Depth& asks_1,\
                 std::shared_ptr<ExchangeFac> exchange_sell,Depth& bids_1,std::string pair);
+    void find_pair(std::shared_ptr<ExchangeFac> exc_first,\
+                    std::shared_ptr<ExchangeFac> exc_second);               //发现高利润交易对
 };
 
 
