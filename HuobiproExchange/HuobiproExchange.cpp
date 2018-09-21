@@ -64,12 +64,12 @@ double HuobiproExchange::print_pair_rate(const std::string pair_str) {
     return 0;
 }
 
-std::pair<std::shared_ptr<std::vector<Depth>>,std::shared_ptr<std::vector<Depth>>> \
+std::pair<std::shared_ptr<std::vector<exc_trade::Depth>>,std::shared_ptr<std::vector<exc_trade::Depth>>> \
         HuobiproExchange::print_pair_depth(const std::string pair_str) {
-    return std::pair<std::shared_ptr<std::vector<Depth>>, std::shared_ptr<std::vector<Depth>>>();
+    return std::pair<std::shared_ptr<std::vector<exc_trade::Depth>>, std::shared_ptr<std::vector<exc_trade::Depth>>>();
 }
 
-void HuobiproExchange::send_to_market(const Trade &trade_data) {
+void HuobiproExchange::send_to_market(const exc_trade::Trade &trade_data) {
 
 }
 

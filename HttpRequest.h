@@ -12,7 +12,7 @@ using namespace web;
 using namespace web::http;
 using namespace web::http::client;
 
-class HttpRequest {
+class HttpRequest{
 public:
     static void send_request(std::string url,http_request requests,std::function<void(json::value)> callback ) {
         http_client client(U(url));
