@@ -52,8 +52,8 @@ void HedgingTrade::trade(std::shared_ptr<ExchangeFac> exchange_buy, Depth& asks_
     auto number=(trade_num>buy_num)?buy_num:trade_num;      //number为交易数量 A交易所买入 B交易所卖出
     
     //3 对冲交易
-    //exchange_buy->send_to_market(Trade(pair,exc_trade::BUY,number,asks_1.rate));
-    //exchange_sell->send_to_market(Trade(pair,exc_trade::SELL,number,bids_1.rate));
+    exchange_buy->send_to_market(Trade(pair,exc_trade::BUY,number,asks_1.rate));
+    exchange_sell->send_to_market(Trade(pair,exc_trade::SELL,number,bids_1.rate));
     std::cout<<"可吃单数: "<<number<<std::endl;
     std::cout<<"吃单价: "<<asks_1.rate<<std::endl;
     std::cout<<"卖出价: "<<bids_1.rate<<std::endl;
@@ -65,7 +65,7 @@ void HedgingTrade::thread_single(std::shared_ptr<ExchangeFac> exc_first, std::sh
     size_t thread_count=0;
     while(true) {
         thread_count++;
-        if(thread_count>10000)
+        if(thread_count>100000)
             break;
         //获得两个平台的卖一价和买一价、价格，多个线程可能会修改交易对的深度信息，需要加锁
         exc_first->get_mutex().lock();
@@ -74,18 +74,21 @@ void HedgingTrade::thread_single(std::shared_ptr<ExchangeFac> exc_first, std::sh
         auto depth_pair_A = exc_first->print_pair_depth(pair);
         auto depth_pair_B = exc_second->print_pair_depth(pair);
         if (depth_pair_A.first->size() == 0 || depth_pair_B.first->size() == 0) {
-            std::cout<<depth_pair_A.first->size()<<std::endl;
-            std::cout<<depth_pair_B.first->size()<<std::endl;
+            std::cout<<"自动交易：深度"<<depth_pair_A.first->size()<<std::endl;
+            std::cout<<"自动交易：深度"<<depth_pair_B.first->size()<<std::endl;
             //解锁
             exc_first->get_mutex().unlock();
             exc_second->get_mutex().unlock();
+	    sleep(10);
             continue;
         }
         auto asks_pair_A = depth_pair_A.first->back();    //卖一价
         auto bids_pair_A = depth_pair_A.second->front();  //买一价
         auto asks_pair_B = depth_pair_B.first->back();    //卖一价
         auto bids_pair_B = depth_pair_B.second->front();  //买一价
-        print_log(exc_first,pair,bids_pair_A.rate,asks_pair_A.rate);
+        exc_first->get_mutex().unlock();
+	exc_second->get_mutex().unlock();
+	print_log(exc_first,pair,bids_pair_A.rate,asks_pair_A.rate);
         print_log(exc_second,pair,bids_pair_B.rate,asks_pair_B.rate);
         std::cout<<std::endl;
 
@@ -101,54 +104,51 @@ void HedgingTrade::thread_single(std::shared_ptr<ExchangeFac> exc_first, std::sh
 		        trade(exc_second,asks_pair_B,exc_first,bids_pair_A,pair);
 		    }
         }
-        exc_first->get_mutex().unlock();
-        exc_second->get_mutex().unlock();
-
-        sleep(10);
+	sleep(10);
     }
 }
 
 void HedgingTrade::find_pair(std::shared_ptr<ExchangeFac> exc_first, std::shared_ptr<ExchangeFac> exc_second) {
 
     //1 发现两个交易所 相同的交易对
-    exc_first->get_mutex().lock();
-    exc_second->get_mutex().lock();
 
     std::vector<std::string> replace_vec;
     auto pair_list_first=exc_first->print_market_list();
     auto pair_list_second=exc_second->print_market_list();
     sort(pair_list_first->begin(),pair_list_first->end());
     sort(pair_list_second->begin(),pair_list_second->end());
-
+	
     set_intersection(pair_list_first->begin(),pair_list_first->end(),\
                        pair_list_second->begin(),pair_list_second->end(),std::back_inserter(replace_vec));
-    exc_first->get_mutex().unlock();
-    exc_second->get_mutex().unlock();
+
     size_t thread_count=0;
     while (true){
-        thread_count++;
-        if(thread_count>10000)
+        std::cout<<"thread_2 run"<<std::endl;
+	thread_count++;
+        if(thread_count>100000)
             break;
         //2 对比差价，查看是否满足搬砖条件
         for(auto pair:replace_vec){
-
             exc_first->get_mutex().lock();
             exc_second->get_mutex().lock();
-            auto depth_pair_A = exc_first->print_pair_depth(pair);
+            std::cout<<pair<<std::endl;
+		auto depth_pair_A = exc_first->print_pair_depth(pair);
             auto depth_pair_B = exc_second->print_pair_depth(pair);
             if (depth_pair_A.first->size() == 0 || depth_pair_B.first->size() == 0) {
-                std::cout<<depth_pair_A.first->size()<<std::endl;
-                std::cout<<depth_pair_B.first->size()<<std::endl;
-                //解锁
+		std::cout<<"交易对发现：获取到的深度"<<depth_pair_A.first->size()<<std::endl;
+                std::cout<<"交易对发现：获取到的深度"<<depth_pair_B.first->size()<<std::endl;
                 exc_first->get_mutex().unlock();
-                exc_second->get_mutex().unlock();
-                continue;
+		exc_second->get_mutex().unlock();
+		sleep(10);
+		continue;
             }
             auto asks_pair_A = depth_pair_A.first->back();    //卖一价
             auto bids_pair_A = depth_pair_A.second->front();  //买一价
             auto asks_pair_B = depth_pair_B.first->back();    //卖一价
             auto bids_pair_B = depth_pair_B.second->front();  //买一价
-            if (asks_pair_A.rate < bids_pair_B.rate) {
+        	exc_first->get_mutex().unlock();    
+	exc_second->get_mutex().unlock();
+		if (asks_pair_A.rate < bids_pair_B.rate) {
                 auto earn_num=(bids_pair_B.rate-asks_pair_A.rate)*100/asks_pair_A.rate;
                 if(earn_num>2){
                     std::cout<<"发现高利润键值对: "<<pair<<" "<<exc_first->get_exchange_name()<<"  卖一价: "<<asks_pair_A.rate\
@@ -166,24 +166,22 @@ void HedgingTrade::find_pair(std::shared_ptr<ExchangeFac> exc_first, std::shared
                     std::cout<<"利润率: "<<earn_num<<"%"<<std::endl;
                 }
             }
-            exc_first->get_mutex().unlock();
-            exc_second->get_mutex().unlock();
+	    std::cout<<"高利润交易对 正在发现~~~~~"<<std::endl;
+		sleep(10);
         }
-        sleep(20);
-        break;
     }
 }
 
 void HedgingTrade::auto_trade(std::shared_ptr<ExchangeFac> exc_first, std::shared_ptr<ExchangeFac> exc_second) {
 
     std::thread single_monitor(&HedgingTrade::thread_single,this,exc_first,exc_second,pair_str);
-    std::thread pair_monitor(&HedgingTrade::find_pair,this,exc_first,exc_second);
+    //std::thread pair_monitor(&HedgingTrade::find_pair,this,exc_first,exc_second);
 
     std::cout<<"当前交易所:"<<exc_first->get_exchange_name()<<"     "<<exc_second->get_exchange_name()<<std::endl;
     std::cout<<pair_str<<" 交易对正在监控~~~~~~"<<std::endl;
 
     single_monitor.join();
-    pair_monitor.join();
+    //pair_monitor.join();
 
     std::cout<<std::endl;
 }

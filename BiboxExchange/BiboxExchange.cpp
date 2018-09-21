@@ -5,6 +5,8 @@
 #include "BiboxExchange.h"
 
 void BiboxExchange::get_market_list(json::value json_result) {
+    if(json_result["result"].is_array()==false)
+	return;
     auto list_array=json_result["result"].as_array();
     for(auto pair:list_array){
         p_pair_list->push_back(pair["pair"].as_string());

@@ -40,7 +40,8 @@ std::pair<std::shared_ptr<std::vector<Depth>>,std::shared_ptr<std::vector<Depth>
 }
 
 void GateioExchange::get_market_list(json::value json_result) {
-
+	if(json_result.is_array()==false)
+		return;
     auto json_array=json_result.as_array();
     for(auto value:json_array) {
         p_pair_list->push_back(value.as_string());
