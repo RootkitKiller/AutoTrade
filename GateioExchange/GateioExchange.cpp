@@ -61,7 +61,7 @@ std::shared_ptr<std::vector<std::string>> GateioExchange::print_market_list() {
     return p_pair_list;
 }
 
-void GateioExchange::get_pair_rate(json::value json_result, double current_pair_rate) {
+void GateioExchange::get_pair_rate(json::value json_result, double &current_pair_rate) {
 
     if(json_result["last"].is_string()==true){
         std::string rate_str =json_result["last"].as_string();
@@ -78,7 +78,7 @@ double GateioExchange::print_pair_rate(const std::string pair_str) {
     requests.set_request_uri(fullstr);
 
     double current_pair_rate=0;
-    callFunction get_result=std::bind(&GateioExchange::get_pair_rate,this,std::placeholders::_1,current_pair_rate);
+    callFunction get_result=std::bind(&GateioExchange::get_pair_rate,this,std::placeholders::_1,std::ref(current_pair_rate));
     HttpRequest::send_request(rest_addr,requests,get_result);
 
     return current_pair_rate;
@@ -131,9 +131,8 @@ void GateioExchange::send_to_market(const exc_trade::Trade &trade_data) {
     delete[] pEncode_buffer;
 }
 
-void GateioExchange::get_balance(json::value json_result,json::value m_balance) {
+void GateioExchange::get_balance(json::value json_result,json::value &m_balance) {
     m_balance=json_result;
-    //std::cout<<json_result<<std::endl;
 }
 
 double GateioExchange::print_balance(const std::string symbol) {
@@ -156,7 +155,7 @@ double GateioExchange::print_balance(const std::string symbol) {
         sprintf(buf+i*2, "%02x", pEncode_buffer[i]);
     buf[128]=0;
     std::string pBuffer(buf);
-    //std::cout<<pBuffer<<std::endl;
+
 
     //3 买入/卖出
 
@@ -167,12 +166,15 @@ double GateioExchange::print_balance(const std::string symbol) {
     curr_request.set_request_uri("/api2/1/private/balances");
     curr_request.set_body(be_sign_data);
 
-    json::value m_balance;                                                          //用户资产余额
-    callFunction get_result=std::bind(&GateioExchange::get_balance,this,std::placeholders::_1,m_balance);
+    json::value m_balance;//用户资产余额
+
+    callFunction get_result=std::bind(&GateioExchange::get_balance,this,std::placeholders::_1,std::ref(m_balance));
     HttpRequest::send_request(rest_addr,curr_request,get_result);
 
     delete[] pEncode_buffer;
+
     //4 请求会阻塞到完成 校验回调函数的结果
+
     if(m_balance["result"].is_string()== true) {
         if (m_balance["result"].as_string() == "true") {
             if (m_balance["available"].is_array() == true) {

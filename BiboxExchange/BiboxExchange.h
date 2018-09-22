@@ -27,11 +27,11 @@ public:
 
 private:
     void get_market_list(json::value json_result,std::shared_ptr<std::vector<std::string>> p_pair_list);
-    void get_pair_rate(json::value json_result,double current_pair_rate);
+    void get_pair_rate(json::value json_result,double &current_pair_rate);
     void get_pair_depth(json::value json_result,std::shared_ptr<std::vector<exc_trade::Depth>> p_asks_depth,\
                         std::shared_ptr<std::vector<exc_trade::Depth>> p_bids_depth);
     void get_trade_result(json::value json_result);
-    void get_balance(json::value json_result,json::value m_balance);
+    void get_balance(json::value json_result,json::value &m_balance);
 
     typedef  std::function<void(json::value json_result)> callFunction;
 };

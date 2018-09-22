@@ -23,7 +23,7 @@ std::shared_ptr<std::vector<std::string>> BiboxExchange::print_market_list() {
     return p_pair_list;
 }
 
-void BiboxExchange::get_pair_rate(json::value json_result,double current_pair_rate) {
+void BiboxExchange::get_pair_rate(json::value json_result,double &current_pair_rate) {
 
     if(json_result["result"]["last"].is_string()==true){
         auto rate_str=json_result["result"]["last"].as_string();
@@ -39,7 +39,7 @@ double BiboxExchange::print_pair_rate(const std::string pair_str) {
     std::string fullstr="/v1/mdata?cmd=market&pair="+pair_str;
     requests.set_request_uri(fullstr);
     double current_pair_rate=0;
-    callFunction get_result=std::bind(&BiboxExchange::get_pair_rate,this,std::placeholders::_1,current_pair_rate);
+    callFunction get_result=std::bind(&BiboxExchange::get_pair_rate,this,std::placeholders::_1,std::ref(current_pair_rate));
     HttpRequest::send_request(rest_addr,requests,get_result);
     return current_pair_rate;
 }
@@ -148,7 +148,7 @@ void BiboxExchange::send_to_market(const exc_trade::Trade &trade_data) {
     delete[] pEncode_buffer;
 }
 
-void BiboxExchange::get_balance(json::value json_result,json::value m_balance ) {
+void BiboxExchange::get_balance(json::value json_result,json::value &m_balance ) {
     m_balance=json_result;
     //std::cout<<json_result<<std::endl;
 }
@@ -166,6 +166,8 @@ double BiboxExchange::print_balance(const std::string symbol) {
 
     auto cmd_str_data="["+cmd_data.serialize();
     cmd_str_data=cmd_str_data+"]";
+
+
     HMAC_CTX ctx;
     HMAC_CTX_init(&ctx);
     HMAC_Init_ex(&ctx, Secret_Key.c_str(), strlen(Secret_Key.c_str()), EVP_md5(), NULL);
@@ -196,7 +198,7 @@ double BiboxExchange::print_balance(const std::string symbol) {
     request_body["sign"]=json::value::string(pBuffer);
     curr_request.set_body(request_body);
     json::value m_balance;
-    callFunction get_result=std::bind(&BiboxExchange::get_balance,this,std::placeholders::_1,m_balance);
+    callFunction get_result=std::bind(&BiboxExchange::get_balance,this,std::placeholders::_1,std::ref(m_balance));
     HttpRequest::send_request(rest_addr,curr_request,get_result);
 
     delete[] pEncode_buffer;
