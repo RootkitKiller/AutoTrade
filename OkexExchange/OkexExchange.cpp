@@ -27,7 +27,7 @@ double OkexExchange::print_pair_rate(const std::string pair_str) {
     //GET https://www.okex.com/api/v1/ticker.do?symbol=ltc_btc
     http_request requests(methods::GET);
     auto new_str=pair_str;
-    new_str=pair_tolower(new_str);
+    pair_tolower(new_str);
     std::string fullstr="/api/v1/ticker.do?symbol="+new_str;
     requests.set_request_uri(fullstr);
     double current_pair_rate=0;
@@ -62,7 +62,7 @@ OkexExchange::print_pair_depth(const std::string pair_str) {
 
     http_request requests(methods::GET);
     auto new_str=pair_str;
-    new_str=pair_tolower(new_str);
+    pair_tolower(new_str);
 
     std::string fullstr="/api/v1/depth.do?symbol="+new_str;
     requests.set_request_uri(fullstr);
@@ -98,7 +98,7 @@ void OkexExchange::send_to_market(const exc_trade::Trade &trade_data) {
     sign_params+="&price=";
     sign_params+=std::to_string(trade_data.trade_rate);
     auto newpair=trade_data.pair_str;
-    newpair=pair_tolower(newpair);
+    pair_tolower(newpair);
     sign_params+="&symbol=";
     sign_params+=newpair;
     sign_params+="&type=";
@@ -117,7 +117,7 @@ void OkexExchange::send_to_market(const exc_trade::Trade &trade_data) {
         sprintf(buf+i*2, "%02x", pEncode_buffer[i]);
     buf[32]=0;
     std::string pBuffer(buf);
-    pBuffer=pair_toupper(pBuffer);
+    pair_toupper(pBuffer);
 
     //2 构建请求request
     http_request requests(methods::POST);
@@ -164,7 +164,7 @@ double OkexExchange::print_balance(const std::string symbol) {
     }
     buf[32]=0;
     std::string pBuffer(buf);
-    pBuffer=pair_toupper(pBuffer);
+    pair_toupper(pBuffer);
 
     //2 构造请求request
     http_request requests(methods::POST);
@@ -182,7 +182,7 @@ double OkexExchange::print_balance(const std::string symbol) {
 
     //4 解析该token的余额
     auto newsymbol=symbol;
-    newsymbol=pair_tolower(newsymbol);
+    pair_tolower(newsymbol);
     if(balance_list["result"]==true){
         auto balance_str=balance_list["info"]["funds"]["free"][newsymbol].as_string();
         return atof(balance_str.c_str());
